@@ -10,11 +10,14 @@ import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import com.andexert.library.RippleView;
+
 public class AddActivity extends AppCompatActivity {
 
     RadioGroup radio_status;
     EditText et_jumlah, et_keterangan;
     Button btn_simpan;
+    RippleView rip_simpan;
     String status;
 
     @Override
@@ -28,6 +31,7 @@ public class AddActivity extends AppCompatActivity {
         et_jumlah     =(EditText) findViewById(R.id.et_jumlah);
         et_keterangan =(EditText) findViewById(R.id.et_keterangan);
         btn_simpan    =(Button) findViewById(R.id.btn_simpan);
+        rip_simpan    =(RippleView) findViewById(R.id.rip_simpan);
 
         radio_status.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -44,13 +48,22 @@ public class AddActivity extends AppCompatActivity {
             }
         });
 
+        rip_simpan.setOnRippleCompleteListener(new RippleView.OnRippleCompleteListener() {
+            @Override
+            public void onComplete(RippleView rippleView) {
+                Toast.makeText(AddActivity.this, "Jumlah : " + et_jumlah.getText().toString()
+                                + " Keterangan : "+ et_keterangan.getText().toString(),
+                        Toast.LENGTH_LONG).show();
+            }
+        });
+
         btn_simpan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // CONTOH TOAST
-                Toast.makeText(AddActivity.this, "Jumlah : " + et_jumlah.getText().toString()
-                                + " Keterangan : "+ et_keterangan.getText().toString(),
-                        Toast.LENGTH_LONG).show();
+//                Toast.makeText(AddActivity.this, "Jumlah : " + et_jumlah.getText().toString()
+//                                + " Keterangan : "+ et_keterangan.getText().toString(),
+//                        Toast.LENGTH_LONG).show();
             }
         });
 
