@@ -1,9 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.example.android.personalkasapp.AddActivity">
 
-</android.support.constraint.ConstraintLayout>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp">
+            <RadioGroup
+                android:id="@+id/radio_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/radio_income"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Income" />
+
+                <RadioButton
+                    android:id="@+id/radio_outcome"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Outcome" />
+            </RadioGroup>
+
+            <EditText
+                android:id="@+id/et_jumlah"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Rp."
+                android:inputType="number" />
+
+            <EditText
+                android:id="@+id/et_keterangan"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="left|top"
+                android:hint="Keterangan"
+                android:maxLines="15"
+                android:minLines="5" />
+
+            <Button
+                android:id="@+id/btn_simpan"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="SIMPAN" />
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>
