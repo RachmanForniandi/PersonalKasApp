@@ -1,5 +1,6 @@
 package com.example.android.personalkasapp;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
@@ -11,6 +12,7 @@ import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.andexert.library.RippleView;
+import com.example.android.personalkasapp.dbHelper.SqliteHelper;
 
 public class AddActivity extends AppCompatActivity {
 
@@ -19,6 +21,7 @@ public class AddActivity extends AppCompatActivity {
     Button btn_simpan;
     RippleView rip_simpan;
     String status;
+    SqliteHelper sqliteHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +29,7 @@ public class AddActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add);
 
         status="";
+        sqliteHelper= new SqliteHelper(this);
 
         radio_status  =(RadioGroup)findViewById(R.id.radio_status);
         et_jumlah     =(EditText) findViewById(R.id.et_jumlah);
@@ -51,10 +55,20 @@ public class AddActivity extends AppCompatActivity {
         rip_simpan.setOnRippleCompleteListener(new RippleView.OnRippleCompleteListener() {
             @Override
             public void onComplete(RippleView rippleView) {
-                Toast.makeText(AddActivity.this, "Jumlah : " + et_jumlah.getText().toString()
-                                + " Keterangan : "+ et_keterangan.getText().toString(),
-                        Toast.LENGTH_LONG).show();
-            }
+                if(status.equals("") || et_jumlah.getText().toString().equals("") || et_keterangan.getText().toString().equals("")){
+                    Toast.makeText(AddActivity.this, "Isi data dengan benar",
+                            Toast.LENGTH_LONG).show();
+                }else{
+                    SQLiteDatabase database = sqliteHelper.getWritableDatabase();
+                        database.execSQL(
+                                "INSERT INTO transaksi(status, jumlah, keterangan) VALUES('" + status +
+                                        "','"+ et_jumlah.getText().toString() + "','" + et_keterangan.getText().toString() + "')"
+                        );
+                    Toast.makeText(AddActivity.this, "Data transaksi berhasil disimpan",
+                            Toast.LENGTH_LONG).show();
+                    finish();
+                    }
+                }
         });
 
         btn_simpan.setOnClickListener(new View.OnClickListener() {
