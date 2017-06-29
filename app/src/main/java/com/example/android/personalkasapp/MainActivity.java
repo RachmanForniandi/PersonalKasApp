@@ -11,14 +11,26 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
 import com.example.android.personalkasapp.dbHelper.SqliteHelper;
 
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
+
 public class MainActivity extends AppCompatActivity {
 
-    String query_kas;
+    TextView txt_masuk, txt_keluar, txt_saldo;
+    ListView list_anggaran;
+    String query_kas, query_total;
     SqliteHelper sqliteHelper;
     Cursor cursor;
+
+    ArrayList<HashMap<String, String>> arraykas = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,9 +39,13 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        query_kas ="SELECT * FROM transaksi";
+        txt_masuk  =(TextView)findViewById(R.id.txt_masuk);
+        txt_keluar =(TextView)findViewById(R.id.txt_keluar);
+        txt_saldo  =(TextView)findViewById(R.id.txt_saldo);
+
+        list_anggaran =(ListView)findViewById(R.id.list_anggaran);
+
         sqliteHelper = new SqliteHelper(this);
-        KasAdapter();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -44,7 +60,24 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onResume(){
+        super.onResume();
+        query_kas =
+                "SELECT *, strftime('%d/%m/%Y', tanggal) AS tgl FROM transaksi_id ORDER BY transaksi_id DESC";
+
+        query_total =
+                "SELECT SUM(jumlah) AS total, (SELECT SUM(jumlah) FROM transaksi WHERE status='MASUK') as masuk," +
+                        "(SELECT SUM(jumlah) FROM transaksi WHERE status='KELUAR')as keluar FROM transaksi";
+
+        KasAdapter();
+
+    }
+
     private void KasAdapter() {
+
+        arraykas.clear();list_anggaran.setAdapter(null);
+
         SQLiteDatabase database = sqliteHelper.getReadableDatabase();
         cursor = database.rawQuery(query_kas, null);
         cursor.moveToFirst();
@@ -52,7 +85,41 @@ public class MainActivity extends AppCompatActivity {
         for (int i=0; i < cursor.getCount(); i++){
             cursor.moveToPosition(i);
             Log.d("status", cursor.getString(1));
+
+            HashMap<String, String>map = new HashMap<>();
+            map.put("transaksi_id", cursor.getString(0));
+            map.put("status",       cursor.getString(1));
+            map.put("jumlah",       cursor.getString(2));
+            map.put("keterangan",   cursor.getString(3));
+//            map.put("tanggal",      cursor.getString(4));
+            map.put("tanggal",      cursor.getString(5));
+
+            arraykas.add(map);
         }
+
+        SimpleAdapter simpleAdapter = new SimpleAdapter(this, arraykas, R.layout.list_anggaran,
+                new String[]{"transaksi_id","status","jumlah","keterangan","tanggal"},
+                new int[] {R.id.txt_transaksi_id, R.id.txt_status, R.id.txt_jumlah, R.id.txt_keterangan, R.id.txt_tanggal} );
+
+        list_anggaran.setAdapter(simpleAdapter);
+
+        KasTotal();
+    }
+
+    private void KasTotal(){
+
+        NumberFormat rupiah = NumberFormat.getInstance(Locale.GERMANY);
+
+        SQLiteDatabase database = sqliteHelper.getReadableDatabase();
+        cursor = database.rawQuery(query_total, null);
+        cursor.moveToFirst();
+
+        txt_masuk.setText( rupiah.format(cursor.getDouble(1)) );
+        txt_keluar.setText( rupiah.format(cursor.getDouble(2)) );
+        txt_saldo.setText(
+                rupiah.format(cursor.getDouble(1) - cursor.getDouble(2) )
+        );
+
     }
 
     @Override
