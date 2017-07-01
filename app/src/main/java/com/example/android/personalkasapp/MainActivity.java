@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
     public void onResume(){
         super.onResume();
         query_kas =
-                "SELECT *, strftime('%d/%m/%Y', tanggal) AS tgl FROM transaksi_id ORDER BY transaksi_id DESC";
+                "SELECT *, strftime('%d/%m/%Y', tanggal) AS tgl FROM transaksi ORDER BY transaksi_id DESC";
 
         query_total =
                 "SELECT SUM(jumlah) AS total, (SELECT SUM(jumlah) FROM transaksi WHERE status='MASUK') as masuk," +
