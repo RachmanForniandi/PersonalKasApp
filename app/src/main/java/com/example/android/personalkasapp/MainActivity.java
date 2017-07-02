@@ -1,19 +1,26 @@
 package com.example.android.personalkasapp;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.personalkasapp.dbHelper.SqliteHelper;
 
@@ -26,11 +33,14 @@ public class MainActivity extends AppCompatActivity {
 
     TextView txt_masuk, txt_keluar, txt_saldo;
     ListView list_anggaran;
+    SwipeRefreshLayout swipe_refresh;
     String query_kas, query_total;
     SqliteHelper sqliteHelper;
     Cursor cursor;
 
     ArrayList<HashMap<String, String>> arraykas = new ArrayList<>();
+
+    String transaksi_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,13 +49,32 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        transaksi_id = "";
+        sqliteHelper = new SqliteHelper(this);
+
         txt_masuk  =(TextView)findViewById(R.id.txt_masuk);
         txt_keluar =(TextView)findViewById(R.id.txt_keluar);
         txt_saldo  =(TextView)findViewById(R.id.txt_saldo);
 
         list_anggaran =(ListView)findViewById(R.id.list_anggaran);
 
-        sqliteHelper = new SqliteHelper(this);
+        swipe_refresh = (SwipeRefreshLayout)findViewById(R.id.swipe_refresh);
+
+        swipe_refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                query_kas =
+                        "SELECT *, strftime('%d/%m/%Y', tanggal) AS tgl FROM transaksi ORDER BY transaksi_id DESC";
+
+                query_total =
+                        "SELECT SUM(jumlah) AS total, (SELECT SUM(jumlah) FROM transaksi WHERE status='MASUK') as masuk," +
+                                "(SELECT SUM(jumlah) FROM transaksi WHERE status='KELUAR')as keluar FROM transaksi";
+
+                KasAdapter();
+            }
+        });
+
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -76,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void KasAdapter() {
 
+        swipe_refresh.setRefreshing(false);
         arraykas.clear();list_anggaran.setAdapter(null);
 
         SQLiteDatabase database = sqliteHelper.getReadableDatabase();
@@ -102,6 +132,15 @@ public class MainActivity extends AppCompatActivity {
                 new int[] {R.id.txt_transaksi_id, R.id.txt_status, R.id.txt_jumlah, R.id.txt_keterangan, R.id.txt_tanggal} );
 
         list_anggaran.setAdapter(simpleAdapter);
+        list_anggaran.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                transaksi_id = ((TextView) view.findViewById(R.id.txt_transaksi_id)).getText().toString();
+                Log.d("transaksi_id", transaksi_id);
+                ListMenu();
+            }
+        });
 
         KasTotal();
     }
@@ -120,6 +159,61 @@ public class MainActivity extends AppCompatActivity {
                 rupiah.format(cursor.getDouble(1) - cursor.getDouble(2) )
         );
 
+    }
+
+    private void ListMenu(){
+        final Dialog dialog = new Dialog(MainActivity.this);
+        dialog.setContentView(R.layout.list_menu);
+        dialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.WRAP_CONTENT);
+
+        TextView txt_edit = (TextView)dialog.findViewById(R.id.txt_edit);
+        TextView txt_hapus = (TextView)dialog.findViewById(R.id.txt_hapus);
+        dialog.show();
+
+        txt_edit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        txt_hapus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                Hapus();
+            }
+        });
+    }
+
+    private void Hapus(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Konfirmasi");
+        builder.setMessage("apakah anda yakin untuk menghapus data transaksi ini?");
+        builder.setPositiveButton(
+                "Yes",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        SQLiteDatabase database = sqliteHelper.getWritableDatabase();
+                        database.execSQL(
+                                "DELETE FROM transaksi WHERE transaksi_id='" + transaksi_id +"'"
+                        );
+                        Toast.makeText(MainActivity.this, "Data transaksi berhasil dihapus",
+                                Toast.LENGTH_LONG).show();
+                        KasAdapter();
+                    }
+                });
+        builder.setNegativeButton(
+                "No",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        builder.show();
     }
 
     @Override
