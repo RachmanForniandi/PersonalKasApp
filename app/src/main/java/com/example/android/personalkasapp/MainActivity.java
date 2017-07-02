@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
     ArrayList<HashMap<String, String>> arraykas = new ArrayList<>();
 
-    String transaksi_id;
+    public static String transaksi_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
+                startActivity(new Intent(MainActivity.this, EditActivity.class));
             }
         });
         txt_hapus.setOnClickListener(new View.OnClickListener() {
