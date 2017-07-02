@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 
+
 public class MainActivity extends AppCompatActivity {
 
     TextView txt_masuk, txt_keluar, txt_saldo;
@@ -40,7 +41,9 @@ public class MainActivity extends AppCompatActivity {
 
     ArrayList<HashMap<String, String>> arraykas = new ArrayList<>();
 
-    public static String transaksi_id;
+    public static TextView txt_filter;
+    public static String transaksi_id, tgl_dari, tgl_ke;
+    public static boolean filter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +52,8 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        transaksi_id = "";
+        transaksi_id = ""; tgl_dari=""; tgl_ke="";
+        filter = false;
         sqliteHelper = new SqliteHelper(this);
 
         txt_masuk  =(TextView)findViewById(R.id.txt_masuk);
@@ -59,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
         list_anggaran =(ListView)findViewById(R.id.list_anggaran);
 
         swipe_refresh = (SwipeRefreshLayout)findViewById(R.id.swipe_refresh);
+
+        txt_filter =(TextView)findViewById(R.id.txt_filter);
 
         swipe_refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -98,6 +104,17 @@ public class MainActivity extends AppCompatActivity {
         query_total =
                 "SELECT SUM(jumlah) AS total, (SELECT SUM(jumlah) FROM transaksi WHERE status='MASUK') as masuk," +
                         "(SELECT SUM(jumlah) FROM transaksi WHERE status='KELUAR')as keluar FROM transaksi";
+        if(filter){
+            query_kas =
+                    "SELECT *, strftime('%d/%m/%Y', tanggal) AS tgl FROM transaksi " +
+            "WHERE(tanggal >= '"+ tgl_dari +"') AND (tanggal <= '"+ tgl_ke +"')ORDER BY transaksi_id ASC";
+
+            query_total =
+                    "SELECT SUM(jumlah) AS total, "+
+                    "(SELECT SUM(jumlah) FROM transaksi WHERE status='MASUK' AND (tanggal >= '"+ tgl_dari +"') AND (tanggal <= '"+ tgl_ke +"'))," +
+                    "(SELECT SUM(jumlah) FROM transaksi WHERE status='KELUAR' AND (tanggal >= '"+ tgl_dari +"') AND (tanggal <= '"+ tgl_ke +"'))" +
+                    "FROM transaksi WHERE (tanggal >= '"+ tgl_dari +"') AND (tanggal <= '"+ tgl_ke +"')";
+        }
 
         KasAdapter();
 
@@ -158,6 +175,8 @@ public class MainActivity extends AppCompatActivity {
         txt_saldo.setText(
                 rupiah.format(cursor.getDouble(1) - cursor.getDouble(2) )
         );
+        if(!filter){ txt_filter.setText("SEMUA"); }
+        filter = false;
 
     }
 
@@ -232,7 +251,8 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_filter) {
+            startActivity(new Intent(MainActivity.this, FilterActivity.class));
             return true;
         }
 

@@ -19,12 +19,14 @@
             android:layout_height="wrap_content"
             android:padding="10dp"
             android:gravity="center">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="INCOME"
                 android:textSize="16dp"
                 android:textStyle="bold"/>
+
             <TextView
                 android:id="@+id/txt_masuk"
                 android:layout_width="wrap_content"
@@ -33,6 +35,7 @@
                 android:text="100000"
                 android:textSize="16dp"
                 android:textStyle="bold"/>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -40,6 +43,7 @@
                 android:text="OUTCOME"
                 android:textSize="16dp"
                 android:textStyle="bold"/>
+
             <TextView
                 android:id="@+id/txt_keluar"
                 android:layout_width="wrap_content"
@@ -49,6 +53,7 @@
                 android:text="100000"
                 android:textSize="16dp"
                 android:textStyle="bold"/>
+
             <View
                 android:id="@+id/view"
                 android:layout_width="match_parent"
@@ -57,6 +62,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
                 android:background="#BDBDBD"/>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -65,6 +71,7 @@
                 android:text="SALDO"
                 android:textSize="16dp"
                 android:textStyle="bold"/>
+
             <TextView
                 android:id="@+id/txt_saldo"
                 android:layout_width="wrap_content"
@@ -75,6 +82,15 @@
                 android:text="100000"
                 android:textSize="16dp"
                 android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/txt_filter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_below="@+id/txt_saldo"
+                android:layout_alignParentRight="true"
+                android:text="SEMUA"
+                android:textAlignment="center"/>
         </RelativeLayout>
 
 
