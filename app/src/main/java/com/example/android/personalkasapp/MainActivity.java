@@ -129,16 +129,20 @@ public class MainActivity extends AppCompatActivity {
         cursor = database.rawQuery(query_kas, null);
         cursor.moveToFirst();
 
-        for (int i=0; i < cursor.getCount(); i++){
+        //utk penulisan format mata uang
+        NumberFormat formatRupiah = NumberFormat.getInstance(Locale.GERMANY);
+
+        int i;
+        for (i=0; i < cursor.getCount(); i++){
             cursor.moveToPosition(i);
             Log.d("status", cursor.getString(1));
 
             HashMap<String, String>map = new HashMap<>();
             map.put("transaksi_id", cursor.getString(0));
             map.put("status",       cursor.getString(1));
-            map.put("jumlah",       cursor.getString(2));
+            map.put("jumlah",       "Rp " + formatRupiah.format(cursor.getDouble(2)));
             map.put("keterangan",   cursor.getString(3));
-//            map.put("tanggal",      cursor.getString(4));
+            //            map.put("tanggal",      cursor.getString(4));
             map.put("tanggal",      cursor.getString(5));
 
             arraykas.add(map);
@@ -170,10 +174,10 @@ public class MainActivity extends AppCompatActivity {
         cursor = database.rawQuery(query_total, null);
         cursor.moveToFirst();
 
-        txt_masuk.setText( rupiah.format(cursor.getDouble(1)) );
-        txt_keluar.setText( rupiah.format(cursor.getDouble(2)) );
+        txt_masuk.setText( "Rp " + rupiah.format(cursor.getDouble(1)) );
+        txt_keluar.setText( "Rp " + rupiah.format(cursor.getDouble(2)) );
         txt_saldo.setText(
-                rupiah.format(cursor.getDouble(1) - cursor.getDouble(2) )
+                "Rp " + rupiah.format(cursor.getDouble(1) - cursor.getDouble(2) )
         );
         if(!filter){ txt_filter.setText("SEMUA"); }
         filter = false;
